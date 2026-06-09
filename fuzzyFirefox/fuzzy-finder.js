@@ -16,25 +16,36 @@ let topResult = null;
 // Fuzzy match function
 // Returns {score: number, rendered: string} or null if no match
 function fuzzyMatch(target, pattern) {
-	if (!pattern) return { score: 0, rendered: escapeHtml(target) };
-	const s = target.toLowerCase();
+	if (!pattern) return {
+		score: 0, rendered: escapeHtml(target),
+		overflow: ""
+	};
+	const tar = target.toLowerCase();
 	const p = pattern.toLowerCase();
 
 	let ti = 0, pi = 0;
 	const matchIdx = [];
+	let overflow = "";
 
-	while (ti < s.length && pi < p.length) {
-		if (s[ti] === p[pi]) {
+	while (ti < tar.length && pi < p.length) {
+		if (tar[ti] === p[pi]) {
 			matchIdx.push(ti);
 			pi++;
 		}
+		if(tar[ti] === '#'){
+			overflow = pattern.substring(pi);
+			ti = tar.length;
+			pi = p.length;
+		}
 		ti++;
 	}
-	if (pi !== p.length) return null; // not all pattern chars matched
+	if (pi < p.length) return null; // not all pattern chars matched
+	if(matchIdx.length == 0)return null;
 
 	// Scoring:
 	// base score starts high, subtract penalties for gaps and later positions
-	let score = 1000;
+	let score = 0;
+	score += 1000 * matchIdx.length;
 	// penalty for starting late
 	score -= matchIdx[0] * 5;
 	// penalty for gaps between matches (encourage consecutive)
@@ -57,7 +68,7 @@ function fuzzyMatch(target, pattern) {
 
 	// Normalize so higher is better; keep raw numeric score too
 	const rendered = renderHighlight(target, matchIdx);
-	return { score: Math.round(score), rendered };
+	return { score: Math.round(score), rendered, overflow };
 }
 
 function renderHighlight(text, idxs) {
@@ -95,7 +106,10 @@ function renderList(query) {
 	for (const it of items) {
 		if(it[0] == "")continue;
 		const m = fuzzyMatch(it[0], query);
-		if (m) matches.push({item: it, score: m.score, rendered: m.rendered});
+		if (m) matches.push({
+			item: it, score: m.score,
+			rendered: m.rendered, overflow: m.overflow
+		});
 	}
 
 	if (matches.length === 0) {
@@ -120,6 +134,27 @@ function renderList(query) {
 	}
 	results.appendChild(frag);
 }
+function sanitiseValue(value){
+
+	let out = "";
+	for(let idx = 0;idx < value.length;idx++){
+		let v = value.charCodeAt(idx);
+		if(v > 64) out += value[idx];
+		else if(v >= 48 && v < 58) out += value[idx];
+		else{
+			let vv = v.toString(16).toUpperCase().padStart(2,"0");
+			out += "%" + vv;
+		}
+	}
+	return out;
+}
+function openLink(res){
+	let out = res.item[1];
+	if(res.item[0].endsWith("#")){
+		out = out.replace("#",sanitiseValue(res.overflow));
+	}
+	window.location.href = out;
+}
 
 // Live events with small debounce for responsiveness
 let timer = null;
@@ -127,10 +162,11 @@ q.addEventListener('input', () => {
 	clearTimeout(timer);
 	timer = setTimeout(() => renderList(q.value.trim()), 120);
 });
+var lk = null;
 q.addEventListener("keydown", (e) => {
 	if(e.key === "Enter"){
 		//setTimeout("alert(topResult.item[1]);",200);
-		setTimeout("window.location.href = topResult.item[1];",200);
+		setTimeout("openLink(topResult);",200);
 		
 		//alert(topResult.item[1]);
 		//window.location.href = topResult.item[1];
@@ -139,5 +175,7 @@ q.addEventListener("keydown", (e) => {
 	if(e.key === "Escape"){
 		q.focus();
 	}
+	lk = e;
+	console.log(e);
 });
 
