@@ -157,14 +157,16 @@ struct ReedSol_Array *reedSol_genGenerator(uint8_t length){
 	struct ReedSol_Array *outArr = malloc(sizeof(struct ReedSol_Array));
 	outArr->length = length + 1;
 	reedSol_Zero(outArr);
-	for(int32_t countup = 0;countup >> length == 0;countup++){
-		uint8_t akku = 1;
-		for(int32_t x = 0;x < length;x++){
-			if((countup >> x) & 1)continue;
-			akku = reedsol_Mul(akku,reedsol_Pow(2,x));
+	outArr->data[0] = 1;
+	uint8_t val,val2;
+	for(int32_t count = 0;count < length;count++){
+		for(int32_t idx = count;idx >= 0;idx--){
+			val = outArr->data[idx];
+			val2 = outArr->data[idx + 1];
+			outArr->data[idx + 1] = reedsol_Add(val2,val);
+			val2 = reedsol_Mul(val,reedsol_Pow(2,count));
+			outArr->data[idx] = val2;
 		}
-		int32_t pos = __builtin_popcount(countup);
-		outArr->data[pos] = reedsol_Add(outArr->data[pos],akku);
 	}
 	return outArr;
 }
@@ -383,7 +385,7 @@ struct ReedSol_Array *reedSol_Encode(
 	for(int32_t idx = 0;idx < msg->length;idx++)
 		redund->data[redund->length + idx] = msg->data[idx];
 	redund->length += msg->length;
-	free(generator);
+	//free(generator);
 	return redund;
 }
 struct ReedSol_Array *reedSol_SplitEncode(
@@ -466,11 +468,20 @@ struct ReedSol_Array *reedSol_SplitDecode(
 #include<time.h>
 int main(int argc,char **argv){
 	reedsol_Init();
-	int32_t red = 4;
+	int32_t red = 3;
 	struct ReedSol_Array *enc,*dec;
 	char *ch0,*ch1,*ch2;
+	struct ReedSol_Array *tst = malloc(sizeof(struct ReedSol_Array));
+	tst->length = 4;
+	char *string = "Hello ";
+	for(int32_t p = 0;string[p];p++){
+		tst->data[p] = string[p];
+		tst->length = p + 1;
+	}
+	enc = reedSol_Encode(tst,red);
+	free(enc);
 
-	/*
+	// *
 	enc = malloc(sizeof(struct ReedSol_Array));
 	enc->length = 10;
 	const int dat[] = {179,97,175,247,80,117,246,97,101,165};
@@ -482,15 +493,9 @@ int main(int argc,char **argv){
 	printf("%s\n",ch1);
 	printf("%s\n",ch2);
 	free(ch1);
-	free(ch2);// */
+	free(ch2);
+	/*/
 
-	struct ReedSol_Array *tst = malloc(sizeof(struct ReedSol_Array));
-	tst->length = 4;
-	char *string = "Hello ";
-	for(int32_t p = 0;string[p];p++){
-		tst->data[p] = string[p];
-		tst->length = p + 1;
-	}
 
 	srand(time(NULL));
 	for(int32_t cnt = 0;cnt < 1000;cnt++){
