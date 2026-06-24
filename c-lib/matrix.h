@@ -26,11 +26,14 @@ struct MatSeed *matRand_newRand(void);
 uint64_t matRand_cycle(struct MatSeed *ms,uint64_t dat);
 // or just use free
 void matRand_free(struct MatSeed *ms);
+struct MatSeed *matRand_fromMat(struct Mat *mat);
 
 
 struct Mat *mat_new(int32_t dim,struct MatSeed *sed);
 struct Mat *mat_mul(struct Mat *left, struct Mat *right);
 void mat_mutate(struct Mat *mat,int32_t cnt,struct MatSeed *seed);
+void mat_mutateLine(struct Mat *mat,int32_t cnt,
+		int32_t line,struct MatSeed *seed);
 // or just use free
 void mat_free(struct Mat *mat);
 
@@ -40,6 +43,7 @@ void mat_generateCorrection(struct Mat *mat,int32_t mutCnt,
 void mat_applyCorrection   (struct Mat *mat,
 		char *outMsg,int32_t byteOut);
 
+//#define MATRIX_IMPL
 #ifdef MATRIX_IMPL
 #include <time.h>
 #include<byteswap.h>
@@ -83,6 +87,22 @@ uint64_t matRand_cycle(struct MatSeed *ms,uint64_t dat){
 	return carry;
 }
 void matRand_free (struct MatSeed *ms){free(ms);}
+struct MatSeed *matRand_fromMat(struct Mat *mat){
+	struct MatSeed *sed = matRand_new();
+	int32_t tst = 1;
+	tst = *((int8_t*)(&tst));
+	uint64_t val;
+	uint64_t *fetch = (uint64_t*)(&(mat->data[0]));
+	int32_t maxFetch = sizeof(uint8_t); // this will miss the last bytes
+	maxFetch *= mat->dim * mat->dim;
+	maxFetch /= sizeof(uint64_t);
+	for(int32_t idx = 0;idx < maxFetch;idx++){
+		val = fetch[idx];
+		if(tst)val = bswap_64(val);
+		matRand_cycle(sed,val);
+	}
+	return sed;
+}
 
 struct Mat *mat_new(int32_t dim,struct MatSeed *sed){
 	size_t sz = sizeof(uint8_t) * dim * dim;
@@ -97,7 +117,7 @@ struct Mat *mat_new(int32_t dim,struct MatSeed *sed){
 	//
 	mat->dim = dim;
 	uint64_t *fill = (uint64_t*)(&(mat->data[0]));
-	int32_t maxFlood = (sz / 8) - 1;
+	int32_t maxFlood = (sz / 8) - 1; // this will miss the last bytes
 	int32_t tst = 1;
 	tst = *((int8_t*)(&tst));
 	uint64_t val;
@@ -142,6 +162,23 @@ void mat_mutate(struct Mat *mat,int32_t cnt,struct MatSeed *seed){
 		pos = *((int32_t*)(&dat));
 		pos %= mat->dim * mat->dim;
 		mat->data[pos] = ((int8_t*)(&dat))[1];
+	}
+}
+void mat_mutateLine(struct Mat *mat,int32_t cnt,
+		int32_t line,struct MatSeed *seed){
+	uint64_t dat;
+	uint32_t pos;
+	uint32_t m1,m2;
+	m1 = line ? 1 : mat->dim;
+	m2 = line ? mat->dim : 1;
+	for(;cnt > 0;cnt--){
+		dat = matRand_cycle(seed,0);
+		pos = *((int32_t*)(&dat));
+		pos %= mat->dim;
+		for(int32_t x = 0;x < mat->dim;x++){
+			dat = matRand_cycle(seed,0);
+			mat->data[pos * m1 + x * m2] = (int8_t)dat;
+		}
 	}
 }
 void mat_free(struct Mat *mat){free(mat);}
