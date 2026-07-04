@@ -76,11 +76,13 @@ void strings_insert_sublist(struct Strings **str,
 
 // this is destructive! free(*str);
 void string_append(char **str,char *from);
+// 1 for "matching"
+int string_end_cmp(char *basis,char *match);
 #endif
 
 void task_set_file(struct Tasks *t,char *file){
 	if(t == NULL){return;} t->file = file;
-	if(t->args == NULL)strings_append(&(t->args), "");
+	if(t->args == NULL)strings_append(&(t->args), file);
 }
 void task_add_args(struct Tasks *t,char *arg){
 	if(t == NULL){return;}
@@ -93,7 +95,7 @@ void task_add_args_many(struct Tasks *t,...){
 	va_start(ap, t);
 	char *get;
 	if(t == NULL){return;}
-	if(t->args == NULL) strings_append(&(t->args), "");
+	if(t->args == NULL) strings_append(&(t->args), t->file);
 	do{
 		get = va_arg(ap,char*);
 		if(get == NULL)break;
@@ -107,12 +109,12 @@ void task_clear_args(struct Tasks *t){strings_clear(&(t->args));}
 void task_clear_env(struct Tasks *t){strings_clear(&(t->env));}
 void task_add_args_merge(struct Tasks *t,struct Strings *str){
 	if(t == NULL){return;}
-	if(t->args == NULL) strings_append(&(t->args), "");
+	if(t->args == NULL) strings_append(&(t->args), t->file);
 	strings_append_list(&(t->args), &str);
 }
 void task_add_env_merge(struct Tasks *t,struct Strings *str){
 	if(t == NULL){return;}
-	if(t->args == NULL) strings_append(&(t->args), "");
+	//if(t->args == NULL) strings_append(&(t->args), "");
 	strings_append_list(&(t->env), &str);
 }
 
@@ -140,7 +142,7 @@ void task_exec(struct Tasks *t){
 		exit(0);
 		return;
 	}
-	printf("%s ",t->file);
+	//printf("%s ",t->file);
 	for(int idx = 0;idx < t->args->count;idx++)
 		printf("%s ",t->args->strs[idx]);
 	printf("\n");
@@ -371,6 +373,17 @@ void string_append(char **str,char *from){
 	out[idx] = 0;
 	free(*str);
 	*str = out;
+}
+int string_end_cmp(char *basis,char *match){
+	char *e1,*e2;
+	for(e1=basis;*e1 != 0;e1++);
+	for(e2=match;*e2 != 0;e2++);
+	for(;e1 >= basis && e2 >= match;e2--,e1--){
+		if(*e1 == *e2)continue;
+		return 0;
+	}
+	if(e2 < match)return 1;
+	return 0;
 }
 #endif
 #endif
