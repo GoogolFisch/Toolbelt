@@ -194,8 +194,6 @@ struct Strings *task_get_direntry_filtered(char *path,FILTER_DIR filter){
 
 #ifndef STRINGS_H_
 #define STRINGS_H_
-#define STRINGS_IMPL
-#ifdef STRINGS_IMPL
 void    strings_append  (struct Strings **str,char   *chars){
 	if(*str == NULL){
 		*str = malloc(sizeof(struct Strings));
@@ -385,7 +383,6 @@ int string_end_cmp(char *basis,char *match){
 	if(e2 < match)return 1;
 	return 0;
 }
-#endif
 #endif
 
 
