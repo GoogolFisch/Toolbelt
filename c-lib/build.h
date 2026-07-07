@@ -78,6 +78,7 @@ void strings_insert_sublist(struct Strings **str,
 void string_append(char **str,char *from);
 // 1 for "matching"
 int string_end_cmp(char *basis,char *match);
+char* string_copy(char *str);
 #endif
 
 void task_set_file(struct Tasks *t,char *file){
@@ -173,7 +174,7 @@ struct Strings *task_get_direntry(char *path){
 	struct dirent *dp;
 	d = opendir(path);
 	while((dp = readdir(d)) != NULL){
-		strings_append(&sout,dp->d_name);
+		strings_append(&sout,string_copy(dp->d_name));
 	}
 	closedir(d);
 	return sout;
@@ -185,7 +186,7 @@ struct Strings *task_get_direntry_filtered(char *path,FILTER_DIR filter){
 	d = opendir(path);
 	while((dp = readdir(d)) != NULL){
 		if(filter(dp))
-			strings_append(&sout,dp->d_name);
+			strings_append(&sout,string_copy(dp->d_name));
 	}
 	closedir(d);
 	return sout;
@@ -311,16 +312,19 @@ void    strings_compact (struct Strings **str){
 void strings_append_many(struct Strings **str,            char *chars,...){
 	va_list ap;
 	va_start(ap, chars);
-	char *get;
+	char *get = chars;
 	while (get) {
+		get = va_arg(ap,char*);
 		strings_append(str,get);
 	}
 }
 void strings_insert_many(struct Strings **str,int32_t idx,char *chars,...){
+	chars = chars;
 	va_list ap;
 	va_start(ap, chars);
-	char *get;
+	char *get = chars;
 	while (get) {
+		get = va_arg(ap,char*);
 		strings_insert(str,idx,get);
 		idx++;
 	}
@@ -365,9 +369,9 @@ void string_append(char **str,char *from){
 	len++;
 	char *out = malloc(sizeof(char) * len);
 	int32_t idx = 0;
-	while(out[idx] = (*str)[idx++]);
+	while((out[idx] = (*str)[idx]))idx++;
 	int32_t jdx = 0;
-	while(out[idx++] = from[jdx++]);
+	while((out[idx++] = from[jdx++]));
 	out[idx] = 0;
 	free(*str);
 	*str = out;
@@ -382,6 +386,12 @@ int string_end_cmp(char *basis,char *match){
 	}
 	if(e2 < match)return 1;
 	return 0;
+}
+char* string_copy(char *str){
+	int len = strlen(str) + 1;
+	char *ou = malloc(sizeof(char) * len);
+	memcpy(ou,str,len);
+	return ou;
 }
 #endif
 
