@@ -177,9 +177,9 @@
             <span>Format</span>
             <span class="mono" style="color:var(--muted)">output</span>
           </label>
-          <select id="show" onchange="pwdChecksum()">
+          <select id="show" onchange="algoChecksum()">
             <option value="UUID" selected>UUID</option>
-            <option value="RAW">Raw(Cut)</option>
+            <option value="RAW">Raw(Cropped)</option>
             <option value="B64">Base64</option>
             <option value="PASS">Password</option>
           </select>
@@ -295,6 +295,7 @@ async function fileChecksum() {
 	pwdChecksum();
 }
 const textEnc = new TextEncoder();
+var savedDigest = null;
 function concatTypedArrays(a, b) { // a, b TypedArray of same type
 	var c = new (a.constructor)(a.length + 1 + b.length);
 	c.set(a, 0);
@@ -311,7 +312,11 @@ async function pwdChecksum() {
 	const concBuffer = concatTypedArrays(textBuffer,arrayBuffer);
 
 	const digest = await crypto.subtle.digest(hashAlg, concBuffer);
-	let oval = getShowAlgo()(digest).slice(0,44);
+	savedDigest = digest;
+	await algoChecksum();
+}
+async function algoChecksum(){
+	let oval = getShowAlgo()(savedDigest).slice(0,44);
 	pwdOutput.value = oval;
 }
 function toClipboard(){
