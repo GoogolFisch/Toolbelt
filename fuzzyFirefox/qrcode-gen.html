@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 16px; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+    }
+    .card h2 { margin: 0 0 10px; font-size: 16px; }
+    .row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; margin: 10px 0; }
+    label { font-size: 13px; color: #374151; }
+    input[type="color"], input[type="number"], textarea, select, input[type="file"] { width: inherit; }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      padding: 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+
+    input[type="file"] {
+      padding: 8px;
+      border: 1px dashed #d1d5db;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+
+    .check {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .check input { width: 18px; height: 18px; }
+
+    /* Output */
+    #drawCanvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+  </style>
+
+  <script src="qr-code.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <!-- THREE SECTIONS: Input, Settings, Output -->
+    <div class="grid">
+      <!-- INPUT -->
+      <section class="card">
+        <h2>Input</h2>
+
+        <div class="row">
+          <label for="ftSelect">Mode</label>
+          <select id="ftSelect" onchange="updateQR()">
+            <option value="T" selected>TEXT</option>
+            <option value="F">FILE</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="textIn">Text</label>
+          <textarea id="textIn" oninput="ftSelect.value = 'T'; updateQR()"
+            placeholder="Type here..."></textarea>
+        </div>
+
+        <div class="row">
+          <label for="fileIn">File</label>
+          <input id="fileIn" type="file" oninput="ftSelect.value = 'F'; updateQR()">
+        </div>
+
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="card">
+        <h2>Settings</h2>
+
+        <div class="row">
+          <label for="eccIn">Error Correction</label>
+          <select id="eccIn" onchange="updateQR()">
+            <option value="L" selected>LOW</option>
+            <option value="M">MEDIUM</option>
+            <option value="Q">QUARTILE</option>
+            <option value="H">HIGH</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="lowVer">Min Version</label>
+          <input id="lowVer" onchange="updateQR()" type="number" value="1" min="1" max="40">
+        </div>
+
+        <div class="row">
+          <label for="uppVer">Max Version</label>
+          <input id="uppVer" onchange="updateQR()" type="number" value="40" min="1" max="40">
+        </div>
+
+        <div class="row">
+          <label for="maskPat">Mask Pattern</label>
+          <input id="maskPat" onchange="updateQR()" type="number" value="-1" min="-1" max="7">
+        </div>
+
+        <div class="row">
+          <label for="boostECC">Boost ECC</label>
+          <div class="check">
+            <input id="boostECC" onchange="updateQR()" type="checkbox" checked>
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="darkCol">Dark Color</label>
+          <input id="darkCol" onchange="updateQR()" type="color" value="#332211">
+        </div>
+
+        <div class="row">
+          <label for="lightCol">Light Color</label>
+          <input id="lightCol" onchange="updateQR()" type="color" value="#ffeedd">
+        </div>
+      </section>
+      <section class="card">
+        <h2>Output</h2>
+        <canvas id="drawCanvas"></canvas>
+      </section>
+    </div>
+    <!---<div class="grid">
+    </div>-->
+  </div>
+
+
+<script>
+const QRC = qrcodegen.QrCode;
+const drawCanvas = document.getElementById("drawCanvas");
+
+const fileIn     = document.getElementById("fileIn");
+const textIn     = document.getElementById("textIn");
+const ftSelect   = document.getElementById("ftSelect");
+const eccIn      = document.getElementById("eccIn");
+const lowVer     = document.getElementById("lowVer");
+const uppVer     = document.getElementById("uppVer");
+const maskPat    = document.getElementById("maskPat");
+const boostECC   = document.getElementById("boostECC");
+const darkColor  = document.getElementById("darkCol");
+const lightColor = document.getElementById("lightCol");
+async function updateQR(){
+	let useEcc = QRC.Ecc.HIGH;
+	if(eccIn.value == 'H')useEcc = QRC.Ecc.HIGH;
+	if(eccIn.value == 'Q')useEcc = QRC.Ecc.QUARTILE;
+	if(eccIn.value == 'M')useEcc = QRC.Ecc.MEDIUM;
+	if(eccIn.value == 'L')useEcc = QRC.Ecc.LOW;
+	let val = textIn.value;
+	const file = fileIn.files && fileIn.files[0];
+	if(ftSelect.value == 'F'){
+		val = new TextDecoder().decode(await file.bytes());
+	}
+	let verLow = +lowVer.value;
+	let verUp  = +uppVer.value;
+	let patMask = +maskPat.value;
+	let upEcc = +boostECC.checked;
+
+	const segs = qrcodegen.QrSegment.makeSegments(val);
+	const qr1 = QRC.encodeSegments(
+		segs,
+		useEcc,
+		+lowVer.value,
+		+uppVer.value,
+		+maskPat.value,
+		+boostECC.checked);
+	drawToCanvas(
+		qr1,
+		4,
+		1,
+		darkColor.value,
+		lightColor.value);
+}
+function drawToCanvas(qr,scale,border,darkColor,lightColor){
+	const width = (qr.size + border * 2) * scale;
+	drawCanvas.width  = width;
+	drawCanvas.height = width;
+	let ctx = drawCanvas.getContext("2d");
+	for(let y = -border;y < qr.size + border;y++){
+		for(let x = -border;x < qr.size + border;x++){
+			ctx.fillStyle = qr.getModule(x,y) ? darkColor : lightColor;
+			ctx.fillRect((x+border) * scale,(y+border)*scale,scale,scale);
+		}
+	}
+}
+setTimeout(() => updateQR(),0);
+
+</script>
+</body>
+</html>
