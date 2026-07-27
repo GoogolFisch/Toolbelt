@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>ReedSolomon Seed File</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<style>
+		:root{
+			--bg0:#070A12;
+			--bg1:#0B1021;
+			--card: rgba(255,255,255,.06);
+			--card2: rgba(255,255,255,.09);
+			--text:#EAF0FF;
+			--muted: rgba(234,240,255,.72);
+			--line: rgba(255,255,255,.12);
+			--accent:#6D5EF3;
+			--accent2:#2EE8A6;
+			--danger:#FF5C7A;
+			--shadow: 0 20px 60px rgba(0,0,0,.45);
+			--radius: 18px;
+		}
+
+		*{ box-sizing:border-box; }
+		html,body{ height:100%; }
+		body{
+			margin:0;
+			font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+			color:var(--text);
+			background:
+				radial-gradient(1200px 600px at 20% 10%, rgba(109,94,243,.35), transparent 55%),
+				radial-gradient(900px 500px at 80% 0%, rgba(46,232,166,.22), transparent 52%),
+				linear-gradient(180deg, var(--bg0), var(--bg1));
+		}
+
+		.page{
+			max-width: 1100px;
+			margin: 0 auto;
+			padding: 28px 18px 44px;
+		}
+
+		.header{
+			display:flex;
+			align-items:flex-start;
+			justify-content:space-between;
+			gap:16px;
+			margin-bottom: 18px;
+		}
+
+		.brand h1{
+			margin:0;
+			font-size: 18px;
+			letter-spacing:.2px;
+			font-weight: 760;
+		}
+		.brand p{
+			margin:6px 0 0;
+			color:var(--muted);
+			font-size: 13px;
+			line-height:1.35;
+			max-width: 680px;
+		}
+
+		.grid{
+			display:grid;
+			grid-template-columns: 1fr;
+			gap: 14px;
+		}
+		@media (min-width: 920px){
+			.grid{ grid-template-columns: 1fr 1fr; }
+		}
+
+		.card{
+			background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow);
+			padding: 16px;
+			overflow:hidden;
+			position:relative;
+		}
+		.card:before{
+			content:"";
+			position:absolute;
+			inset:-2px;
+			background:
+				radial-gradient(600px 260px at 15% 0%, rgba(109,94,243,.22), transparent 50%),
+				radial-gradient(480px 240px at 95% 10%, rgba(46,232,166,.14), transparent 55%);
+			opacity:.9;
+			pointer-events:none;
+		}
+		.card > *{ position:relative; }
+
+		.card h2{
+			margin:0 0 12px;
+			font-size: 14px;
+			letter-spacing:.35px;
+			text-transform: uppercase;
+			color: rgba(234,240,255,.84);
+			font-weight: 800;
+		}
+
+		.field{
+			display:flex;
+			flex-direction:column;
+			gap:8px;
+			margin-bottom: 12px;
+		}
+
+		label{
+			font-size: 12px;
+			color: var(--muted);
+			font-weight: 650;
+		}
+
+		input[type="file"],
+		input[type="text"],
+		input[type="output"],
+		input[type="number"]{
+			width:100%;
+			border-radius: 12px;
+			border: 1px solid rgba(255,255,255,.14);
+			background: rgba(8,10,18,.35);
+			color: var(--text);
+			padding: 10px 12px;
+			outline:none;
+			transition: border-color .15s ease, background .15s ease, transform .05s ease;
+		}
+		input[type="text"]::placeholder{ color: rgba(234,240,255,.35); }
+
+		input:focus{
+			border-color: rgba(109,94,243,.65);
+			background: rgba(8,10,18,.55);
+		}
+
+		textarea{
+			width:100%;
+			height: 22rem;
+			resize: vertical;
+			border-radius: 12px;
+			border: 1px solid rgba(255,255,255,.14);
+			background: rgba(8,10,18,.35);
+			color: var(--text);
+			padding: 12px;
+			outline:none;
+			transition: border-color .15s ease, background .15s ease;
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+			font-size: 12.5px;
+			line-height: 1.35;
+		}
+		textarea:focus{
+			border-color: rgba(46,232,166,.55);
+			background: rgba(8,10,18,.55);
+		}
+
+		.row{
+			display:flex;
+			gap: 10px;
+			align-items:flex-end;
+			flex-wrap:wrap;
+		}
+		.row > *{
+			flex: 1 1 180px;
+		}
+		.row .shrink{ flex: 0 0 180px; }
+
+		.hint{
+			font-size: 12px;
+			color: var(--muted);
+			margin-top: -4px;
+			line-height:1.35;
+		}
+
+		.badge{
+			display:inline-flex;
+			align-items:center;
+			gap:8px;
+			border: 1px solid rgba(255,255,255,.14);
+			background: rgba(0,0,0,.18);
+			padding: 8px 10px;
+			border-radius: 12px;
+			color: rgba(234,240,255,.88);
+			font-size: 12px;
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+		.badge .dot{
+			width:10px; height:10px; border-radius:50%;
+			background: linear-gradient(180deg, var(--accent), rgba(109,94,243,.4));
+			box-shadow: 0 0 0 4px rgba(109,94,243,.12);
+		}
+
+		.output{
+			margin-top: 10px;
+		}
+		.output .badge{
+			width:100%;
+			min-height: 42px;
+		}
+
+		.actions{
+			display:flex;
+			gap:10px;
+			align-items:center;
+			margin-top: 8px;
+			flex-wrap:wrap;
+		}
+
+		button{
+			border: 1px solid rgba(255,255,255,.16);
+			background: linear-gradient(180deg, rgba(109,94,243,.9), rgba(109,94,243,.55));
+			color: white;
+			padding: 10px 14px;
+			border-radius: 12px;
+			font-weight: 760;
+			cursor:pointer;
+			transition: transform .08s ease, filter .15s ease, border-color .15s ease;
+			box-shadow: 0 14px 30px rgba(109,94,243,.22);
+		}
+		button:hover{
+			filter: brightness(1.05);
+			border-color: rgba(109,94,243,.65);
+		}
+		button:active{ transform: translateY(1px); }
+
+		button.secondary{
+			background: rgba(255,255,255,.08);
+			box-shadow:none;
+			font-weight: 700;
+		}
+
+		.smallstats{
+			display:grid;
+			grid-template-columns: 1fr;
+			gap: 10px;
+		}
+		@media (min-width: 520px){
+			.smallstats{ grid-template-columns: 1fr 1fr; }
+		}
+		.kv{
+			border: 1px solid rgba(255,255,255,.12);
+			background: rgba(0,0,0,.16);
+			border-radius: 14px;
+			padding: 12px;
+		}
+		.kv .k{
+			font-size: 12px;
+			color: var(--muted);
+			font-weight: 700;
+			margin-bottom: 6px;
+		}
+		.kv .v{
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+			font-size: 12.5px;
+			word-break: break-word;
+			color: rgba(234,240,255,.95);
+		}
+
+		/* Fine-tune file input */
+		input[type="file"]{
+			padding: 10px;
+		}
+
+	</style>
+</head>
+<body>
+	<div class="page">
+		<div class="header">
+			<div class="brand">
+				<h1>ReedSolomon Seed File</h1>
+			</div>
+		</div>
+
+		<div class="grid">
+			<div class="card">
+				<h2>Encode</h2>
+
+				<div class="field">
+					<label for="fileIn">Input file</label>
+					<input id="fileIn" type="file" oninput="FileEncEcc()" />
+				</div>
+
+				<div class="field">
+					<label for="keyIn">Key</label>
+					<input id="keyIn" type="text" placeholder="e.g. 01020304" oninput="FileEncEcc()" />
+				</div>
+
+				<div class="output">
+					<div class="badge" title="Protected Reed–Solomon hex output">
+						<span class="dot"></span>
+						<span id="eccOut">...</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<h2>Decode</h2>
+
+				<div class="field">
+					<label for="eccIn">Codes here</label>
+					<textarea id="eccIn" oninput="EccCheckFile(true)"></textarea>
+				</div>
+
+				<div class="row">
+					<div class="shrink">
+						<div class="field" style="margin-bottom:0;">
+							<label for="lengthIn">Recovered length</label>
+							<input id="lengthIn" oninput="EccCheckFile()" type="number" value="0" min="0" max="180">
+						</div>
+					</div>
+
+					<div style="flex: 1 1 auto; min-width: 240px;">
+						<div class="smallstats">
+							<label for="checksum">Checksum</div>
+							<input type="output" id="checksum" value="...">
+						</div>
+					<button id="download" onclick="downloadFile()">Download</button>
+					</div>
+				</div>
+
+				<div class="actions">
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+const LOG_TABLE = new Uint8Array(256);
+const EXP_TABLE = new Uint8Array(256);
+(function (){
+	let val = 1;
+	for(let idx = 0;idx < 255;idx++){
+		EXP_TABLE[idx] = val;
+		LOG_TABLE[val] = idx;
+		val = val << 1
+		val ^= (val & 0x100) ^ ((val >> 8) * 29);
+	}
+})()
+function red_add(x,y){return x^y;}
+function red_mul(x,y){
+	if(x === 0 || y === 0)return 0;
+	return EXP_TABLE[(LOG_TABLE[x] + LOG_TABLE[y]) % 255];
+}
+function red_div(x,y){
+	if(x === 0 || y === 0)return 0;
+	return EXP_TABLE[(255 + LOG_TABLE[x] - LOG_TABLE[y]) % 255];
+}
+function red_pow(x,y){return EXP_TABLE[(LOG_TABLE[x] * y) % 255];}
+function red_compact(arr){
+	let idx;
+	for(idx = arr.length - 1;idx >= 0;idx--){
+		if(arr[idx] != 0)break;
+	}
+	return arr.slice(0,idx + 1);
+}
+function red_getGenerator(length){
+	let gen = new Uint8Array(length + 1);
+	gen[0] = 1;
+	let val,val2;
+	for(let count = 0;count < length;count++){
+		for(let idx = count;idx >= 0;idx--){
+			val = gen[idx];
+			val2 = gen[idx + 1];
+			gen[idx + 1] = red_add(val,val2);
+			val2 = red_mul(val,red_pow(2,count));
+			gen[idx] = val2;
+		}
+	}
+	return gen;
+}
+function red_polMod(msg,gen){
+	cp = msg.slice();
+	outp = new Uint8Array(gen.length - 1);
+	let v,genMul,pos;
+	for(let idx = msg.length - 1;idx >= 0;idx--){
+		v = cp[idx];
+		v = red_div(v,gen[gen.length - 1]);
+		for(let x = 0;x < gen.length - 1;x++){
+			pos = idx + x - gen.length + 1;
+			genMul = red_mul(gen[x],v);
+			if(pos >= 0)
+				cp[pos] = red_add(genMul,cp[pos]);
+			else{
+				pos = gen.length + pos - 1;
+				outp[pos] = red_add(genMul,outp[pos]);
+			}
+		}
+	}
+	return outp;
+}
+function red_testFor(msg,pos){
+	let akku = 0;
+	let powing = 1;
+	for(let idx = 0;idx < msg.length;idx++){
+		akku = red_add(akku,red_mul(powing,msg[idx]));
+		powing = red_mul(powing,pos);
+	}
+	return akku;
+}
+function red_errorArray(msg,redund){
+	arr = new Uint8Array(redund);
+	for(let idx = 0;idx < redund;idx++){
+		let pow = red_pow(2,idx);
+		arr[idx] = red_testFor(msg,pow);
+	}
+	return arr;
+}
+function red_polDivision(left,right){
+	outF = left.slice();
+	outH = new Uint8Array(left.length - right.length + 1);
+	let v,genMul,pos,holdx;
+	holdx = left.length - right.length;
+	for(let idx = left.length - 1;idx >= right.length - 1;idx--){
+		v = outF[idx];
+		v = red_div(v,right[right.length - 1]);
+		outH[holdx--] = v;
+		for(let x = 0;x < right.length - 1;x++){
+			pos = idx + x - right.length + 1;
+			genMul = red_mul(right[x],v);
+			outF[pos] = red_add(genMul,outF[pos]);
+		}
+	}
+	return {
+	hole:red_compact(outH),
+	frac:red_compact(outF.slice(0,right.length - 1))
+	};
+}
+function red_euclidean(error,errCount){
+	let a0 = new Uint8Array(errCount * 2 + 1);
+	a0[errCount * 2] = 1;
+	let a1 = error;
+	let anew;
+	let b0 = new Uint8Array(1);
+	b0[0] = 1;
+	let b1 = new Uint8Array(1);
+	let full;
+	let calc;
+	while(a1.length > errCount){
+		let o = red_polDivision(a0,a1);
+		full = o.hole;
+		anew = o.frac;
+		let _b1 = new Uint8Array(b0.length + full.length - 1);
+		_b1.set(b1,0);
+		b1 = _b1;
+		for(let x = 0;x < b0.length;x++){
+			for(let y = 0;y < full.length;y++){
+				calc = red_mul(full[y],b0[x]);
+				b1[x + y] = red_add(calc,b1[x + y]);
+			}
+		}
+		b1 = b0;
+		b0 = _b1;
+		a0 = a1;
+		a1 = anew;
+	}
+	return {errVal:a1,errLoc:b0};
+}
+function red_findErr(pol,length){
+	let out = new Uint8Array(length);
+	for(let x = 0;x < length;x++){
+		out[x] = red_testFor(pol,red_pow(2,x));
+	}
+	return out;
+}
+function red_findErrIdx(pol,length){
+	let out = [];
+	let outIdx = 0;
+	for(let x = 0;x < length;x++){
+		let overPow = red_div(1,red_pow(2,x));
+		let val = red_testFor(pol,overPow);
+		if(val == 0)
+			out.push(x);
+	}
+	return out;
+}
+function red_testInMsg(pol,pos){
+	let outp = new Uint8Array(pos.length);
+	let pos_;
+	for(let idx = 0;idx < pos.length;idx++){
+		pos_ = pos[idx];
+		outp[idx] = red_testFor(pol,pos_);
+	}
+	return outp;
+}
+function red_testForDerive(pol,pos){
+	let akku = 0;
+	let possq = red_pow(2,pos);
+	possq = red_div(1,red_mul(possq,possq));
+	let posak = 1;
+	for(let x = 1;x < pol.length;x += 2){
+		akku = red_add(akku,red_mul(pol[x],posak));
+		posak = red_mul(posak,possq);
+	}
+	return akku;
+}
+function red_getErrDiff(val,loc,pos){
+	let pow2 = red_pow(2,pos);
+	let inver = red_div(1,pow2);
+	let akku = red_mul(pow2,red_testFor(val,inver));
+	return red_div(akku,red_testForDerive(loc,pos));
+}
+function red_errDiffs(val,loc,pos){
+	outArr = [];
+	for(let idx = 0;idx < pos.length;idx++){
+		outArr[idx] = red_getErrDiff(val,loc,pos[idx]);
+	}
+	return outArr;
+}
+function red_Encode(msg,redCnt){
+	let generator = red_getGenerator(redCnt);
+	let redund = red_polMod(msg,generator);
+	let outArr = new Uint8Array(msg.length + redund.length);
+	outArr.set(redund,0);
+	outArr.set(msg,redund.length);
+	return outArr;
+}
+function red_Decode(msg,redCnt){
+	cp = msg.slice();
+	tst = red_findErr(msg,redCnt);
+	let doNeedWork = 0
+	for(let idx = 0;idx < tst.length;idx++){
+		if(tst[idx] != 0){
+			doNeedWork = 1;
+			break;
+		}
+	}
+	if(!doNeedWork)return cp.slice(redCnt);
+	red_compact(tst);
+	let errVal,errLoc,errPos,errDif;
+	let o = red_euclidean(tst,redCnt >> 1);
+	errVal = o.errVal;
+	errLoc = o.errLoc;
+	let invert = errLoc[0];
+	for(let idx = 0;idx < errVal.length;idx++)
+		errVal[idx] = red_mul(errVal[idx],invert);
+	for(let idx = 0;idx < errLoc.length;idx++)
+		errLoc[idx] = red_mul(errLoc[idx],invert);
+	errPos = red_findErrIdx(errLoc,msg.length);
+	errDif = red_errDiffs(errVal,errLoc,errPos);
+	let pos;
+	for(let idx = 0;idx < errPos.length;idx++){
+		pos = errPos[idx];
+		cp[pos] = red_add(cp[pos],errDif[idx]);
+	}
+	return cp.slice(redCnt);
+}
+
+
+
+const keySize = 8;
+function nStepHash(key){
+	for(let i = 0;i < keySize;i++){
+		let v0 = key[(i + 2) % keySize] >> 2;
+		let v1 = key[(i + 1) % keySize] << 1;
+		key[i % keySize] += (v0 ^ v1) & 0xff;
+	}
+}
+// key as in uint8array[4]
+function encodeEnc(msg,key){
+	let outp = new Uint8Array(msg.length + keySize);
+	outp.set(key,0);
+	outp.set(msg,keySize);
+	for(let i = keySize;i < outp.length;i++){
+		nStepHash(key);
+		outp[i] ^= key[0];
+	}
+	return outp;
+}
+function decodeEnc(msg){
+	let outp = msg.slice(keySize);
+	const key = msg.slice(0,keySize);
+	for(let i = 0;i < outp.length;i++){
+		nStepHash(key);
+		outp[i] ^= key[0];
+	}
+	return outp;
+}
+
+function bufToHex(buffer) {
+	const bytes = new Uint8Array(buffer);
+	let hex = '';
+	for (let i = 0; i < bytes.length; i++) {
+		hex += bytes[i].toString(16).padStart(2, '0');
+	}
+	return hex;
+}
+const SectionSplit = 8;
+const SectionInner = 2;
+function bufToHexSplit(buffer) {
+	const bytes = new Uint8Array(buffer);
+	let template = '<div class="wrapper">'
+	let hex = template;
+	let objId = 0;
+	for (let i = 0; i < bytes.length;) {
+		if(i % SectionSplit == 0)hex += template + (objId++) + ": ";
+		hex += bytes[i].toString(16).padStart(2, '0');
+		i++;
+		if(i >= bytes.length)continue;
+		if(i % SectionSplit == 0)hex += "</div>"
+		else if(i % SectionInner == 0)hex += "-"
+	}
+	return hex + "</div>";
+}
+function hexToBuffer(str){
+	const outp = new Uint8Array(SectionSplit);
+	let idx = 0;
+	for(let i = 0;i < str.length;i++){
+		let v = 0;
+		if(str[i] == ' ')continue;
+		if(str[i] == '-'){
+			if(str[i-1] == '-')
+				idx += SectionInner - idx % SectionInner;
+			else if(idx % SectionInner != 0)
+				idx += SectionInner - idx % SectionInner;
+			continue;
+		}
+		v = parseInt(str[i]+str[i+1],16);
+		outp[idx] = v;
+		idx++;
+		i++;
+	}
+	if(idx < SectionSplit)
+		return outp.slice(0,idx);
+	return outp;
+}
+
+const redundTerms = 64;
+const fileInput = document.getElementById('fileIn');
+const keyInput  = document.getElementById('keyIn');
+const eccOutput = document.getElementById('eccOut');
+
+const eccIn     = document.getElementById('eccIn');
+const lengthIn  = document.getElementById('lengthIn');
+const checksum  = document.getElementById('checksum');
+//const fileOutput = document.getElementById('fileOutput');
+
+async function FileEncEcc(){
+	const file = fileInput.files && fileInput.files[0];
+	if (!file) { eccOutput.textContent = '....'; return; }
+	const arBuf = await file.bytes();
+	let digest = await crypto.subtle.digest("SHA-1", arBuf);
+	if(keyInput.value !== ""){
+		const hKey = hexToBuffer(keyInput.value);
+		digest = hKey.slice(0,keySize);
+	}
+	else	digest = new Uint8Array(digest);
+	const enc = encodeEnc(arBuf,digest);
+	const eccBuf = red_Encode(enc,redundTerms);
+
+	const display = bufToHexSplit(eccBuf);
+	eccOutput.innerHTML = display + `\n(${arBuf.length} bytes in)`;
+}
+let recoveryData = null;
+function downloadFile(){
+	// Step 3: Create a temporary URL for the blob
+	const blobUrl = URL.createObjectURL(new Blob([recoveryData]));
+	// Step 4: Create an anchor element to trigger download
+	const a = document.createElement('a');
+	a.href = blobUrl;
+	// Set filename (we’ll dynamically extract this later)
+	a.download = 'seed.raw'; // Temporary static name
+	// Simulate click and clean up
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	// Revoke the blob URL to free memory
+	URL.revokeObjectURL(blobUrl);
+}
+async function EccCheckFile(nLen = false){
+	const lnMap = eccIn.value.split("\n").filter((v)=>{
+		return v.indexOf(":") > 0
+	}).map((v)=>{
+		let a = v.split(":");
+		if(a.length != 2)return;
+		return [+a[0],hexToBuffer(a[1])];
+	}).sort((l,r)=>(l[0]-r[0]));
+	if(nLen){
+		let length = SectionSplit * lnMap[lnMap.length - 1][0];
+		length += lnMap[lnMap.length - 1][1].length;
+		length -= keySize + redundTerms;
+		lengthIn.value = length+"";
+	}
+	let fData = new Uint8Array((+lengthIn.value) + redundTerms + keySize);
+	for(const pval of lnMap){
+		fData.set(pval[1],pval[0] * SectionSplit);
+	}
+	const corr = red_Decode(fData,redundTerms);
+	const decoded= decodeEnc(corr).slice(0,lengthIn.value);
+	// checksum
+	const digest = await crypto.subtle.digest("SHA-1", decoded);
+	const checkDig = bufToHex(digest).slice(0,8);
+	const asText = new TextDecoder().decode(decoded);
+	//checksum.textContent = checkDig;
+	checksum.value = checkDig;
+
+	recoveryData = decoded;
+}
+setTimeout(() => FileEncEcc(),0);
+setTimeout(() => EccCheckFile(),0);
+</script>
+</html>
