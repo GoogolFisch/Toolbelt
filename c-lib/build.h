@@ -314,8 +314,8 @@ void strings_append_many(struct Strings **str,            char *chars,...){
 	va_start(ap, chars);
 	char *get = chars;
 	while (get) {
-		get = va_arg(ap,char*);
 		strings_append(str,get);
+		get = va_arg(ap,char*);
 	}
 }
 void strings_insert_many(struct Strings **str,int32_t idx,char *chars,...){
@@ -324,8 +324,8 @@ void strings_insert_many(struct Strings **str,int32_t idx,char *chars,...){
 	va_start(ap, chars);
 	char *get = chars;
 	while (get) {
-		get = va_arg(ap,char*);
 		strings_insert(str,idx,get);
+		get = va_arg(ap,char*);
 		idx++;
 	}
 }
